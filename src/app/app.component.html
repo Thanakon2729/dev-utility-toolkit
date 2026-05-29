@@ -1,0 +1,152 @@
+<div class="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 p-6">
+  <div class="mx-auto max-w-7xl rounded-[32px] bg-white/90 p-6 shadow-soft backdrop-blur-xl">
+    <div class="grid gap-6 xl:grid-cols-[280px_1fr]">
+      <aside class="rounded-[28px] border border-pink-200 bg-pink-50 p-6 shadow-soft">
+        <div class="mb-8">
+          <div class="text-3xl font-extrabold text-purple-800">EarthDev</div>
+          <div class="mt-2 text-sm text-purple-600">Developer toolbox &amp; command helper</div>
+        </div>
+
+        <div class="mb-6">
+          <input
+            class="w-full rounded-3xl border border-pink-200 bg-white px-4 py-3 text-sm text-purple-900 outline-none shadow-inner"
+            placeholder="ค้นหาเมนู..."
+            [(ngModel)]="searchText"
+            *ngIf="view === 'commands'"
+          />
+        </div>
+
+        <div class="space-y-3">
+          <button
+            class="w-full rounded-3xl px-4 py-3 text-left font-semibold transition hover:bg-pink-200"
+            [ngClass]="{ 'bg-pink-200 text-purple-800 shadow-soft': view === 'commands' && mode === 'kubectl' }"
+            (click)="setView('commands', 'kubectl')"
+          >
+            🚀 Kubectl Helper
+          </button>
+          <button
+            class="w-full rounded-3xl px-4 py-3 text-left font-semibold transition hover:bg-pink-200"
+            [ngClass]="{ 'bg-pink-200 text-purple-800 shadow-soft': view === 'commands' && mode === 'linux' }"
+            (click)="setView('commands', 'linux')"
+          >
+            🧪 Linux
+          </button>
+          <button
+            class="w-full rounded-3xl px-4 py-3 text-left font-semibold transition hover:bg-pink-200"
+            [ngClass]="{ 'bg-pink-200 text-purple-800 shadow-soft': view === 'diff' }"
+            (click)="setView('diff')"
+          >
+            📝 Text / JSON Diff
+          </button>
+        </div>
+      </aside>
+
+      <main class="rounded-[28px] bg-white p-6 shadow-soft">
+        <header class="mb-6 border-b border-pink-100 pb-5">
+          <h1 class="text-4xl font-extrabold text-purple-900">EarthDev Helper</h1>
+          <p class="mt-2 max-w-2xl text-sm text-purple-600">
+            รวมคำสั่ง kubectl และ Linux + เครื่องมือ diff ข้อความ/JSON แบบเรียบง่าย
+          </p>
+        </header>
+
+        <section *ngIf="view === 'commands'">
+          <div class="mb-4 flex flex-wrap gap-3">
+            <span class="rounded-full bg-pink-100 px-4 py-2 text-sm font-semibold text-pink-700">Mode</span>
+            <span class="rounded-full bg-purple-100 px-4 py-2 text-sm font-semibold text-purple-700">{{ mode === 'kubectl' ? 'Kubectl' : 'Linux' }}</span>
+          </div>
+
+          <div class="grid gap-5">
+            <div
+              *ngFor="let item of filteredCommands"
+              class="rounded-[28px] border border-pink-100 bg-pink-50 p-5 shadow-soft"
+            >
+              <div class="mb-2 inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                {{ item.category }}
+              </div>
+              <h2 class="text-xl font-bold text-purple-900">{{ item.title }}</h2>
+              <pre class="mt-4 rounded-2xl border border-dashed border-pink-200 bg-white p-4 text-sm text-purple-900">
+{{ item.command }}</pre>
+              <p class="mt-4 text-sm text-purple-700">{{ item.description }}</p>
+              <button
+                class="mt-5 rounded-3xl bg-gradient-to-r from-pink-300 to-purple-300 px-5 py-3 text-sm font-semibold text-purple-900 shadow-soft transition hover:opacity-95"
+                (click)="copyCommand(item.command)"
+              >
+                Copy Command
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-6 rounded-3xl bg-purple-50 p-5 text-sm text-purple-700">
+            <strong>Tip:</strong> พิมพ์ค้นหาใน sidebar เพื่อกรองคำสั่งได้ง่ายขึ้น
+          </div>
+        </section>
+
+        <section *ngIf="view === 'diff'">
+          <div class="grid gap-5 lg:grid-cols-2">
+            <div class="rounded-[28px] border border-pink-100 bg-pink-50 p-5">
+              <label class="mb-2 block text-sm font-semibold text-purple-700">Text A</label>
+              <textarea
+                class="h-56 w-full rounded-3xl border border-pink-200 bg-white p-4 text-sm text-purple-900 outline-none shadow-inner"
+                [(ngModel)]="diffInputA"
+                placeholder="วางข้อความหรือ JSON ตรงนี้"
+              ></textarea>
+            </div>
+            <div class="rounded-[28px] border border-pink-100 bg-pink-50 p-5">
+              <label class="mb-2 block text-sm font-semibold text-purple-700">Text B</label>
+              <textarea
+                class="h-56 w-full rounded-3xl border border-pink-200 bg-white p-4 text-sm text-purple-900 outline-none shadow-inner"
+                [(ngModel)]="diffInputB"
+                placeholder="วางข้อความหรือ JSON ที่ต้องการเปรียบเทียบ"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="mt-5 flex flex-wrap items-center gap-3">
+            <select
+              class="rounded-3xl border border-pink-200 bg-white px-4 py-3 text-sm text-purple-900 outline-none"
+              [(ngModel)]="diffType"
+            >
+              <option value="text">Text</option>
+              <option value="json">JSON</option>
+            </select>
+            <select
+              class="rounded-3xl border border-pink-200 bg-white px-4 py-3 text-sm text-purple-900 outline-none"
+              [(ngModel)]="diffMode"
+            >
+              <option value="line">Line diff</option>
+              <option value="char">Character diff</option>
+            </select>
+            <button
+              class="rounded-3xl bg-gradient-to-r from-pink-300 to-purple-300 px-5 py-3 text-sm font-semibold text-purple-900 shadow-soft transition hover:opacity-95"
+              (click)="compareDiff()"
+            >
+              Compare
+            </button>
+          </div>
+
+          <div class="mt-5 rounded-[28px] border border-pink-100 bg-white p-5">
+            <div class="mb-3 text-sm font-semibold text-purple-700">Diff Result</div>
+            <div class="space-y-1 text-sm leading-7 text-purple-900">
+              <ng-container *ngFor="let token of diffResult">
+                <div [ngClass]="{
+                  'bg-green-50 text-green-800': token.type === 'added',
+                  'bg-red-50 text-red-700': token.type === 'removed',
+                  'text-purple-700': token.type === 'same'
+                }" class="rounded-2xl px-3 py-2"
+                >
+                  <span *ngIf="token.type === 'added'">+ </span>
+                  <span *ngIf="token.type === 'removed'">- </span>
+                  <span *ngIf="token.type === 'same'">  </span>
+                  {{ token.text }}
+                </div>
+              </ng-container>
+              <div *ngIf="diffResult.length === 0" class="rounded-2xl border border-dashed border-pink-200 bg-pink-50 p-4 text-sm text-purple-700">
+                ใส่ข้อความสองชุด แล้วกด Compare เพื่อดูความแตกต่าง
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  @apply bg-pink-50 text-purple-900;
+  min-height: 100vh;
+}
+
+button, select, textarea, input {
+  @apply font-sans;
+}
+
+::selection {
+  @apply bg-pink-200 text-purple-900;
+}
